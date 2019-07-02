@@ -11,9 +11,14 @@ class MkdirCommand(name: String) extends Command {
     } else if (name.contains(Directory.SEPARATOR)){
       state.copy(output = s"$name: illegal name.")
     } else {
+
+
+
+
       val newContents = Directory.empty(state.workingDirectory.parentPath, name) :: state.workingDirectory.contents
       val newWD = state.workingDirectory.copy(contents = newContents)
       state.copy(workingDirectory = newWD)
+      //hay q actualizar tambien el directorio padre para q en su lista no tenga el objeto antiguo sino el nuevo, y asi recursivamente
     }
 
   }
