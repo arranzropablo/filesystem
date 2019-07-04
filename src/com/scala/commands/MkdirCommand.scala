@@ -6,24 +6,36 @@ import com.scala.filesystem.State
 class MkdirCommand(name: String) extends Command {
 
   override def apply(state: State): State = {
+
+
+
+
     if (state.workingDirectory.hasEntry(name)){
       state.copy(output = s"$name already exists.")
     } else if (name.contains(Directory.SEPARATOR)){
       state.copy(output = s"$name: illegal name.")
     } else {
-
-
-
-
-      val newContents = Directory.empty(state.workingDirectory.parentPath, name) :: state.workingDirectory.contents
-      val newWD = state.workingDirectory.copy(contents = newContents)
-      state.copy(workingDirectory = newWD)
-      //hay q actualizar tambien el directorio padre para q en su lista no tenga el objeto antiguo sino el nuevo, y asi recursivamente
+      doMkdir(state, name)
     }
 
   }
-    //val newDir: DirEntry =  Directory.empty(state.workingDirectory.parentPath, name)
-    //state.copy(workingDirectory = state.workingDirectory.copy(contents = state.workingDirectory.contents :: newDir))
 
+  def doMkdir(state: State, name: String): State = {
+    def updateStructure(currentDirectory: Directory, path: List[String], newEntry: DirEntry): Directory = {
+      if (path.isEmpty) {
+        currentDirectory.addEntry(newEntry)
+      }
+    }
+
+    val wd = state.workingDirectory
+
+    val allDirsInPath = wd.getAllParentFolders
+    val newDir = Directory.empty(wd.path, name)
+
+    val newRoot = updateStructure(state.root, allDirsInPath, newDir)
+    val newWd = newRoot.findDescendant(allDirsInPath)
+
+    State(newRoot, newWd)
+  }
 
 }
